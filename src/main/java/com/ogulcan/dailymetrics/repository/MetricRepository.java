@@ -25,4 +25,33 @@ public interface MetricRepository extends JpaRepository<Metric, Long> {
             @Param("activityTypeId") Long activityTypeId,
             @Param("startDate") LocalDate startDate
     );
+
+    // NATIVE SQL QUERY İLE GÜNCELLENMİŞ METOT
+    @Query(value = "SELECT " +
+            "    m.activity_type_id as activityTypeId, " +        // activity_type tablosundan alınacak
+            "    at.name as activityName, " +                     // activity_type tablosundan alınacak
+            "    at.image as activityImage, " +                   // activity_type tablosundan alınacak
+            "    m.count as maxCount, " +
+            "    MIN(m.date) as firstAchievedDate " +
+            "FROM " +
+            "    metric m " + // Tablo adı: metric (entity adı değil)
+            "JOIN " +
+            "    activity_type at ON m.activity_type_id = at.id " + // activity_type tablosuna join
+            "WHERE " +
+            "    m.user_id = :userId AND " +
+            "    m.count = (SELECT MAX(m2.count) " +
+            "               FROM metric m2 " + // Tablo adı: metric
+            "               WHERE m2.user_id = :userId AND m2.activity_type_id = m.activity_type_id) " +
+            "GROUP BY " +
+            "    m.activity_type_id, at.name, at.image, m.count " +
+            "ORDER BY " +
+            "    at.name ASC", nativeQuery = true) // nativeQuery = true eklendi
+    List<Object[]> findPersonalBestRecordsByUserId(@Param("userId") Long userId);
+
+    List<Metric> findAllByUser_IdAndActivityType_IdAndDateBetweenOrderByDateAsc(
+            Long userId,
+            Long activityTypeId,
+            LocalDate startDate,
+            LocalDate endDate
+    );
 }

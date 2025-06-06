@@ -33,8 +33,7 @@ public class LeaderboardController {
             // Eğer buraya düşerse, bir yetkilendirme sorunu olabilir.
             return ResponseEntity.status(401).build(); // Unauthorized
         }
-        LeaderboardResponseDTO responseDTO = leaderboardService.getLeaderboard(activityId, period);
+        LeaderboardResponseDTO responseDTO = leaderboardService.getLeaderboard(activityId, period, currentUser);
         return ResponseEntity.ok(responseDTO);
     }
-
 }
